@@ -327,6 +327,7 @@ file_builder_allocate_for_hash (FileBuilder            *fb,
          n_items       * sizeof (struct gvdb_hash_item);
 
   data = file_builder_allocate (fb, 4, size, pointer);
+  g_assert (data);
 
 #define chunk(s) (size -= (s), data += (s), data - (s))
   memcpy (chunk (sizeof bloom_hdr), &bloom_hdr, sizeof bloom_hdr);
