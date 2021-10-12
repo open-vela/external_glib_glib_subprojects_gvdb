@@ -162,11 +162,11 @@ gvdb_item_set_parent (GvdbItem *item,
 typedef struct
 {
   GvdbItem **buckets;
-  gint n_buckets;
+  gsize n_buckets;
 } HashTable;
 
 static HashTable *
-hash_table_new (gint n_buckets)
+hash_table_new (gsize n_buckets)
 {
   HashTable *table;
 
@@ -361,7 +361,7 @@ file_builder_add_hash (FileBuilder         *fb,
   HashTable *mytable;
   GvdbItem *item;
   guint32 index;
-  gint bucket;
+  gsize bucket;
 
   mytable = hash_table_new (g_hash_table_size (table));
   g_hash_table_foreach (table, hash_table_insert, mytable);
