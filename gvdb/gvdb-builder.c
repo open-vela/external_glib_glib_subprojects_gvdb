@@ -509,28 +509,44 @@ file_builder_serialise (FileBuilder          *fb,
   return result;
 }
 
+GBytes *
+gvdb_table_get_contents (GHashTable     *table,
+                         gboolean        byteswap)
+{
+  struct gvdb_pointer root;
+  FileBuilder *fb;
+  GString *str;
+  GBytes *res;
+  gsize str_len;
+
+  fb = file_builder_new (byteswap);
+  file_builder_add_hash (fb, table, &root);
+  str = file_builder_serialise (fb, root);
+
+  str_len = str->len;
+  res = g_bytes_new_take (g_string_free (str, FALSE), str_len);
+
+  return res;
+}
+
 gboolean
 gvdb_table_write_contents (GHashTable   *table,
                            const gchar  *filename,
                            gboolean      byteswap,
                            GError      **error)
 {
-  struct gvdb_pointer root;
+  GBytes *content;
   gboolean status;
-  FileBuilder *fb;
-  GString *str;
 
   g_return_val_if_fail (table != NULL, FALSE);
   g_return_val_if_fail (filename != NULL, FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-  fb = file_builder_new (byteswap);
-  file_builder_add_hash (fb, table, &root);
-  str = file_builder_serialise (fb, root);
-  file_builder_free (fb);
+  content = gvdb_table_get_contents (table, byteswap);
 
-  status = g_file_set_contents (filename, str->str, str->len, error);
-  g_string_free (str, TRUE);
+  status = g_file_set_contents (filename, g_bytes_get_data (content, NULL), g_bytes_get_size (content), error);
+
+  g_bytes_unref (content);
 
   return status;
 }
